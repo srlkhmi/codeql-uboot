@@ -1,5 +1,6 @@
 import cpp
-from Function f, FunctionCall fc
+//from Function f, FunctionCall fc
+from FunctionCall fc
 where fc.getTarget().getName()="memcpy"
 /*where 
     f.getName()="memcpy" and
