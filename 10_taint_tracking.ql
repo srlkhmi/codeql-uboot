@@ -2,26 +2,30 @@ import cpp
 import semmle.code.cpp.dataflow.TaintTracking
 import DataFlow::PathGraph
 
-/**
- * An expression involved when swapping the byte order of network data.
- * Its value is likely to have been read from the network.
- */
+
 class NetworkByteSwap extends Expr {
   NetworkByteSwap() {
     exists(MacroInvocation mi |
-      mi.getMacroName().regexpMatch("ntoh(s|l|ll)") and
-      this = mi.getExpr()
+        mi.getExpr() = this and mi.getMacroName().regexpMatch("ntoh(s|l|ll)") 
+     
     )
   }
 }
 
 class Config extends TaintTracking::Configuration {
-  Config() { this = "Config: this name doesn't matter" }
+  Config() { this = "NetworkToMemFuncLength" }
 
-  override predicate isSource(DataFlow::Node source) { source.asExpr() instanceof NetworkByteSwap }
+  override predicate isSource(DataFlow::Node source)
+  { 
+      source.asExpr() instanceof NetworkByteSwap 
+  }
 
   override predicate isSink(DataFlow::Node sink) {
-    exists(FunctionCall c | c.getTarget().getName() = "memcpy" and sink.asExpr() = c.getArgument(2))
+    exists(FunctionCall c | 
+        sink.asExpr() = c.getArgument(2) and
+        c.getTarget().getName() = "memcpy" 
+         
+        )
   }
 }
 
